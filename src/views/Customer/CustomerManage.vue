@@ -2,9 +2,10 @@
   <div class="table-box">
     <ProTable ref="proTable" title="客户列表" rowKey="id" :columns="columns" :requestApi="CustomerApi.page" :data-callback="dataCallback" :init-param="initParam">
       <!-- 表格 header 按钮 -->
-      <!-- <template #tableHeader>
-        <el-button type="primary" :icon="CirclePlus" v-hasPermi="['sys:department:add']" @click="openDrawer('新增')">新增部门</el-button>
-      </template> -->
+      <template #tableHeader>
+        <!-- <el-button type="primary" :icon="CirclePlus" v-hasPermi="['sys:department:add']" @click="openDrawer('新增')">新增部门</el-button> -->
+        <el-button type="primary" :icon="Download" v-hasPermi="['sys:customer:export']" @click="downloadFile">导出</el-button>
+      </template>
       <!-- 表格操作 -->
       <!-- <template #operation="scope">
         <el-button type="primary" link :icon="EditPen" v-hasPermi="['sys:department:edit']" @click="openDrawer('编辑', scope.row)">编辑</el-button>
@@ -20,6 +21,9 @@ import ProTable from '@/components/ProTable/index.vue'
 import { CustomerApi } from '@/api/modules/customer'
 import { CustomerLevelList, CustomerSourceList, FollowUpStatusList, GenderList, IsKeyDecisionMakerList } from '@/configs/enum'
 // import { CirclePlus, EditPen, Delete } from '@element-plus/icons-vue'
+import { Download } from '@element-plus/icons-vue'
+import { ElMessageBox } from 'element-plus'
+import { useDownload } from '@/hooks/useDownload'
 // import { useHandleData } from '@/hooks/useHandleData'
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
@@ -125,6 +129,13 @@ const columns: ColumnProps[] = [
   },
   { prop: 'operation', label: '操作', fixed: 'right', width: 330 }
 ]
+
+const downloadFile = async () => {
+  if (initParam) {
+    proTable.value.searchParam.isPublic = initParam.isPublic
+  }
+  ElMessageBox.confirm('确认导出客户信息吗？', '温馨提示', { type: 'warning' }).then(() => useDownload(CustomerApi.export, '客户信息', proTable?.value.searchParam))
+}
 
 // // 打开 drawer(新增、查看、编辑)
 // const dialogRef = ref()
