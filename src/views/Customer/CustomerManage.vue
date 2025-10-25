@@ -10,13 +10,13 @@
       :searchCol="{ xs: 2, sm: 3, md: 4, lg: 6, xl: 8 }"
     >
       <!-- 表格 header 按钮 -->
-      <template #tableHeader="scope">
+      <template #tableHeader="scope" v-if="props.isShowHeader">
         <el-button type="primary" :icon="CirclePlus" v-hasPermi="['sys:customer:add']" @click="openDrawer('新增')">新增客户</el-button>
         <el-button type="primary" :icon="Download" plain @click="downloadFile" v-hasPermi="['sys:customer:export']">导出客户</el-button>
         <el-button type="danger" :icon="Delete" :disabled="!scope.isSelected" v-hasPermi="['sys:customer:remove']" @click="batchDelete(scope.selectedListIds)">批量删除</el-button>
       </template>
       <!-- 表格操作 -->
-      <template #operation="scope">
+      <template #operation="scope" v-if="props.isShowHeader">
         <el-button type="primary" link :icon="EditPen" v-hasPermi="['sys:customer:edit']" @click="openDrawer('编辑', scope.row)">编辑</el-button>
         <el-button type="danger" link :icon="Delete" v-hasPermi="['sys:customer:remove']" @click="batchDelete([scope.row.id])">删除</el-button>
         <el-button type="warning" link :icon="Share" v-hasPermi="['sys:customer:share']" @click="customerToPublic(scope.row.id)">转入公海</el-button>
@@ -40,6 +40,17 @@ import { useDownload } from '@/hooks/useDownload'
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTable = ref()
+
+const props = defineProps({
+  isShowHeader: {
+    type: Boolean,
+    default: true
+  }
+})
+// 暴露给父组件调用
+defineExpose({
+  proTable
+})
 
 // 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
 const initParam = reactive({ isPublic: 0 })
@@ -144,7 +155,7 @@ const columns: ColumnProps[] = [
     label: '创建时间',
     width: 200
   },
-  { prop: 'operation', label: '操作', fixed: 'right', width: 330 }
+  { prop: 'operation', label: '操作', fixed: 'right', width: 330, isShow: props.isShowHeader }
 ]
 
 // 打开 drawer(新增、查看、编辑)

@@ -44,6 +44,12 @@ export enum IsKeyDecisionMaker {
   NO
 }
 
+export enum ContractStatus {
+  INITIALIZING,
+  APPROVED,
+  REJECTED
+}
+
 export const CustomerLevelList: { [key in CustomerLevel]: EnumInfo } = {
   [CustomerLevel.ORDINARY_CUSTOMER]: { value: 0, label: '普通客户' },
   [CustomerLevel.PREMIUM_CUSTOMER]: { value: 1, label: '优质客户' },
@@ -95,4 +101,10 @@ export const ProductStatusList: { [key in ProductStatus]: EnumInfo } = {
   [ProductStatus.INITIALIZING]: { value: 0, label: '初始化' },
   [ProductStatus.ONLINE]: { value: 1, label: '上架' },
   [ProductStatus.OFFLINE]: { value: 2, label: '下架' }
+}
+
+export const ContractStatusList: { [key in ContractStatus]: EnumInfo } = {
+  [ContractStatus.INITIALIZING]: { value: 0, label: '初始化' },
+  [ContractStatus.APPROVED]: { value: 1, label: '审核通过' },
+  [ContractStatus.REJECTED]: { value: 2, label: '审核不通过' }
 }
