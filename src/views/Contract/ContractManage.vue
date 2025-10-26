@@ -99,11 +99,6 @@ const columns: ColumnProps[] = [
     label: '合同结束时间',
     minWidth: 140
   },
-  {
-    prop: 'ownerId',
-    label: '签约人'
-  },
-
   { prop: 'operation', label: '操作', fixed: 'right', width: 330 }
 ]
 
