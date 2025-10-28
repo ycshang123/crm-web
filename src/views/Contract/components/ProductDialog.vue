@@ -7,7 +7,7 @@
     :cancel-dialog="cancelDialog"
     width="80%"
   >
-    <ProductManage :is-show-header="false" ref="productManageRef" />
+    <ProductManage :is-show-header="false" :status="1" ref="productManageRef" />
     <template #footer>
       <slot name="footer">
         <el-button @click="cancelDialog">取消</el-button>
@@ -42,7 +42,7 @@ const dialogProps = ref<DialogProps>({
   title: '',
   row: {},
   labelWidth: 160,
-  fullscreen: true,
+  fullscreen: false,
   maxHeight: '500px'
 })
 

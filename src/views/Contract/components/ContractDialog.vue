@@ -19,47 +19,59 @@
         :hide-required-asterisk="dialogProps.isView"
       >
         <el-form-item label="合同编号" prop="number" v-if="dialogProps.row!.id">
-          <el-input v-model="dialogProps.row!.number" clearable aria-readonly="true" show-word-limit></el-input>
+          <el-input v-model="dialogProps.row!.number" readonly="true" show-word-limit></el-input>
         </el-form-item>
         <el-form-item label="合同名称" prop="name">
           <el-input v-model="dialogProps.row!.name" clearable maxlength="100" show-word-limit></el-input>
         </el-form-item>
         <el-form-item label="签约客户" prop="customerId">
-          <div class="flex">
+          <div class="flex" style="width: 100%">
             <el-input v-model="dialogProps.row!.customerName" placeholder="请选择要签约的客户" class="mr-18px" disabled> </el-input>
 
             <el-button type="primary" @click="openCustomerDialog">客户信息</el-button>
             <CustomerDialog ref="customerRef" @get-customer-data="openCustomerDialog" />
           </div>
         </el-form-item>
-        <el-form-item label="合同签约时间" prop="signTime">
-          <el-date-picker
-            v-model="dialogProps.row!.signTime"
-            type="datetime"
-            placeholder="选择合同签约时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            :disabled-date="(time) => time.getTime() < Date.now() - 8.64e7"
-          />
+        <div class="flex" style="width: 100%">
+          <el-form-item label="合同开始时间" prop="startTime">
+            <el-date-picker
+              v-model="dialogProps.row!.startTime"
+              type="date"
+              placeholder="选择合同开始时间"
+              value-format="YYYY-MM-DD"
+              :disabled-date="(time) => time.getTime() < Date.now() - 8.64e7"
+            />
+          </el-form-item>
+          <el-form-item label="合同结束时间" prop="endTime">
+            <el-date-picker
+              v-model="dialogProps.row!.endTime"
+              type="date"
+              placeholder="选择合同结束时间"
+              value-format="YYYY-MM-DD"
+              :disabled-date="(time) => time.getTime() < Date.now() - 8.64e7"
+            />
+          </el-form-item>
+          <el-form-item label="合同签约时间" prop="signTime">
+            <el-date-picker
+              v-model="dialogProps.row!.signTime"
+              type="date"
+              placeholder="选择合同签约时间"
+              value-format="YYYY-MM-DD"
+              :disabled-date="(time) => time.getTime() < Date.now() - 8.64e7"
+            />
+          </el-form-item>
+        </div>
+        <div class="flex" style="width: 100%">
+          <el-form-item label="合同总金额" prop="amount" style="flex: 1">
+            <el-input v-model="dialogProps.row!.amount" clearable readonly="true"></el-input>
+          </el-form-item>
+          <el-form-item label="已收款项" prop="receivedAmount" style="flex: 1">
+            <el-input v-model="dialogProps.row!.receivedAmount" clearable readonly="true"></el-input>
+          </el-form-item>
+        </div>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="dialogProps.row!.remark" clearable type="textarea" maxlength="100" show-word-limit></el-input>
         </el-form-item>
-        <el-form-item label="合同开始时间" prop="startTime">
-          <el-date-picker
-            v-model="dialogProps.row!.startTime"
-            type="datetime"
-            placeholder="选择合同开始时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            :disabled-date="(time) => time.getTime() < Date.now() - 8.64e7"
-          />
-        </el-form-item>
-        <el-form-item label="合同结束时间" prop="endTime">
-          <el-date-picker
-            v-model="dialogProps.row!.endTime"
-            type="datetime"
-            placeholder="选择合同结束时间"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            :disabled-date="(time) => time.getTime() < Date.now() - 8.64e7"
-          />
-        </el-form-item>
-
         <div style="width: 100%">
           <h2>合同产品关系</h2>
           <el-divider />
@@ -123,7 +135,7 @@ const dialogProps = ref<DialogProps>({
     products: []
   },
   labelWidth: 120,
-  fullscreen: true,
+  fullscreen: false,
   maxHeight: '500px'
 })
 
@@ -137,8 +149,29 @@ const acceptParams = (params: DialogProps): void => {
 defineExpose({
   acceptParams
 })
+
+// ✅ 自定义校验函数
+const validateEndTime = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('请选择合同结束时间'))
+  } else if (dialogProps.value.row.startTime && new Date(value) < new Date(dialogProps.value.row.endTime)) {
+    callback(new Error('合同结束时间不能早于开始时间'))
+  } else {
+    callback()
+  }
+}
 const rules = reactive({
-  name: [{ required: true, message: '请输入合同名称', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入合同名称', trigger: 'blur' }],
+  customerId: [{ required: true, message: '请选择客户', trigger: 'blur' }],
+  startTime: [{ required: true, message: '请选择合同开始时间', trigger: 'blur' }],
+  endTime: [
+    { required: true, message: '请选择合同结束时间', trigger: 'blur' },
+    {
+      validator: validateEndTime,
+      trigger: 'blur'
+    }
+  ],
+  signTime: [{ required: true, message: '请选择合同签约时间', trigger: 'blur' }]
 })
 
 // 新增一行
@@ -160,6 +193,8 @@ const removeContractProduct = (index) => {
 // 计算小计（可选，实时更新单价×数量）
 const calculateSubtotal = (item) => {
   item.totalPrice = item.price * item.count
+  // 重新计算合同总金额，避免累加错误
+  dialogProps.value.row.amount = dialogProps.value.row.products.reduce((total, product) => total + product.price * product.count, 0)
 }
 
 const ruleFormRef = ref<FormInstance>()

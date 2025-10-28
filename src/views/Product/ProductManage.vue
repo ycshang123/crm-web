@@ -40,15 +40,20 @@ import ProductStateDialog from './components/ProductStateDialog.vue'
 
 // 获取 ProTable 元素，调用其获取刷新数据方法（还能获取到当前查询参数，方便导出携带参数）
 const proTable = ref()
-
-// 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
-const initParam = reactive({})
 const props = defineProps({
   isShowHeader: {
     type: Boolean,
     default: true
+  },
+  status: {
+    type: Number,
+    default: null
   }
 })
+
+// 如果表格需要初始化请求参数，直接定义传给 ProTable(之后每次请求都会自动带上该参数，此参数更改之后也会一直带上，改变此参数会自动刷新表格数据)
+const initParam = reactive({ status: props.status })
+
 // 暴露给父组件调用
 defineExpose({
   proTable
